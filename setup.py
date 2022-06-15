@@ -223,100 +223,99 @@ def GetOptionFromArgv(option_str):
 if __name__ == '__main__':
   ext_module_list = []
   warnings_as_errors = '--warnings_as_errors'
-  if GetOptionFromArgv('--cpp_implementation'):
-    # Link libprotobuf.a and libprotobuf-lite.a statically with the
-    # extension. Note that those libraries have to be compiled with
-    # -fPIC for this to work.
-    compile_static_ext = GetOptionFromArgv('--compile_static_extension')
-    libraries = ['protobuf']
-    extra_objects = None
-    if compile_static_ext:
-      libraries = None
-      extra_objects = ['../src/.libs/libprotobuf.a',
-                       '../src/.libs/libprotobuf-lite.a']
-    TestConformanceCmd.target = 'test_python_cpp'
+  # Link libprotobuf.a and libprotobuf-lite.a statically with the
+  # extension. Note that those libraries have to be compiled with
+  # -fPIC for this to work.
+  compile_static_ext = GetOptionFromArgv('--compile_static_extension')
+  libraries = ['protobuf']
+  extra_objects = None
+  if compile_static_ext:
+    libraries = None
+    extra_objects = ['../src/.libs/libprotobuf.a',
+                     '../src/.libs/libprotobuf-lite.a']
+  TestConformanceCmd.target = 'test_python_cpp'
 
-    extra_compile_args = []
+  extra_compile_args = []
 
-    message_extra_link_args = None
-    api_implementation_link_args = None
-    if 'darwin' in sys.platform:
-      if sys.version_info[0] == 2:
-        message_init_symbol = 'init_message'
-        api_implementation_init_symbol = 'init_api_implementation'
-      else:
-        message_init_symbol = 'PyInit__message'
-        api_implementation_init_symbol = 'PyInit__api_implementation'
-      message_extra_link_args = [
-          '-Wl,-exported_symbol,_%s' % message_init_symbol
-      ]
-      api_implementation_link_args = [
-          '-Wl,-exported_symbol,_%s' % api_implementation_init_symbol
-      ]
+  message_extra_link_args = None
+  api_implementation_link_args = None
+  if 'darwin' in sys.platform:
+    if sys.version_info[0] == 2:
+      message_init_symbol = 'init_message'
+      api_implementation_init_symbol = 'init_api_implementation'
+    else:
+      message_init_symbol = 'PyInit__message'
+      api_implementation_init_symbol = 'PyInit__api_implementation'
+    message_extra_link_args = [
+        '-Wl,-exported_symbol,_%s' % message_init_symbol
+    ]
+    api_implementation_link_args = [
+        '-Wl,-exported_symbol,_%s' % api_implementation_init_symbol
+    ]
 
-    if sys.platform != 'win32':
-      extra_compile_args.append('-Wno-write-strings')
-      extra_compile_args.append('-Wno-invalid-offsetof')
-      extra_compile_args.append('-Wno-sign-compare')
-      extra_compile_args.append('-Wno-unused-variable')
-      extra_compile_args.append('-std=c++11')
+  if sys.platform != 'win32':
+    extra_compile_args.append('-Wno-write-strings')
+    extra_compile_args.append('-Wno-invalid-offsetof')
+    extra_compile_args.append('-Wno-sign-compare')
+    extra_compile_args.append('-Wno-unused-variable')
+    extra_compile_args.append('-std=c++11')
 
-    if sys.platform == 'darwin':
-      extra_compile_args.append('-Wno-shorten-64-to-32')
-      extra_compile_args.append('-Wno-deprecated-register')
+  if sys.platform == 'darwin':
+    extra_compile_args.append('-Wno-shorten-64-to-32')
+    extra_compile_args.append('-Wno-deprecated-register')
 
-    # https://developer.apple.com/documentation/xcode_release_notes/xcode_10_release_notes
-    # C++ projects must now migrate to libc++ and are recommended to set a
-    # deployment target of macOS 10.9 or later, or iOS 7 or later.
-    if sys.platform == 'darwin':
-      mac_target = str(sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET'))
-      if mac_target and (pkg_resources.parse_version(mac_target) <
-                         pkg_resources.parse_version('10.9.0')):
-        os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
-        os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(
-            r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1',
-            util.get_platform())
+  # https://developer.apple.com/documentation/xcode_release_notes/xcode_10_release_notes
+  # C++ projects must now migrate to libc++ and are recommended to set a
+  # deployment target of macOS 10.9 or later, or iOS 7 or later.
+  if sys.platform == 'darwin':
+    mac_target = str(sysconfig.get_config_var('MACOSX_DEPLOYMENT_TARGET'))
+    if mac_target and (pkg_resources.parse_version(mac_target) <
+                       pkg_resources.parse_version('10.9.0')):
+      os.environ['MACOSX_DEPLOYMENT_TARGET'] = '10.9'
+      os.environ['_PYTHON_HOST_PLATFORM'] = re.sub(
+          r'macosx-[0-9]+\.[0-9]+-(.+)', r'macosx-10.9-\1',
+          util.get_platform())
 
-    # https://github.com/Theano/Theano/issues/4926
-    if sys.platform == 'win32':
-      extra_compile_args.append('-D_hypot=hypot')
+  # https://github.com/Theano/Theano/issues/4926
+  if sys.platform == 'win32':
+    extra_compile_args.append('-D_hypot=hypot')
 
-    # https://github.com/tpaviot/pythonocc-core/issues/48
-    if sys.platform == 'win32' and  '64 bit' in sys.version:
-      extra_compile_args.append('-DMS_WIN64')
+  # https://github.com/tpaviot/pythonocc-core/issues/48
+  if sys.platform == 'win32' and  '64 bit' in sys.version:
+    extra_compile_args.append('-DMS_WIN64')
 
-    # MSVS default is dymanic
-    if sys.platform == 'win32':
-      extra_compile_args.append('/MT')
+  # MSVS default is dymanic
+  if sys.platform == 'win32':
+    extra_compile_args.append('/MT')
 
-    if 'clang' in os.popen('$CC --version 2> /dev/null').read():
-      extra_compile_args.append('-Wno-shorten-64-to-32')
+  if 'clang' in os.popen('$CC --version 2> /dev/null').read():
+    extra_compile_args.append('-Wno-shorten-64-to-32')
 
-    if warnings_as_errors in sys.argv:
-      extra_compile_args.append('-Werror')
-      sys.argv.remove(warnings_as_errors)
+  if warnings_as_errors in sys.argv:
+    extra_compile_args.append('-Werror')
+    sys.argv.remove(warnings_as_errors)
 
-    # C++ implementation extension
-    ext_module_list.extend([
-        Extension(
-            'google.protobuf.pyext._message',
-            glob.glob('google/protobuf/pyext/*.cc'),
-            include_dirs=['.', '../src'],
-            libraries=libraries,
-            extra_objects=extra_objects,
-            extra_link_args=message_extra_link_args,
-            library_dirs=['../src/.libs'],
-            extra_compile_args=extra_compile_args,
-        ),
-        Extension(
-            'google.protobuf.internal._api_implementation',
-            glob.glob('google/protobuf/internal/api_implementation.cc'),
-            extra_compile_args=(extra_compile_args +
-                                ['-DPYTHON_PROTO2_CPP_IMPL_V2']),
-            extra_link_args=api_implementation_link_args,
-        ),
-    ])
-    os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'cpp'
+  # C++ implementation extension
+  ext_module_list.extend([
+      Extension(
+          'google.protobuf.pyext._message',
+          glob.glob('google/protobuf/pyext/*.cc'),
+          include_dirs=['.', '../src'],
+          libraries=libraries,
+          extra_objects=extra_objects,
+          extra_link_args=message_extra_link_args,
+          library_dirs=['../src/.libs'],
+          extra_compile_args=extra_compile_args,
+      ),
+      Extension(
+          'google.protobuf.internal._api_implementation',
+          glob.glob('google/protobuf/internal/api_implementation.cc'),
+          extra_compile_args=(extra_compile_args +
+                              ['-DPYTHON_PROTO2_CPP_IMPL_V2']),
+          extra_link_args=api_implementation_link_args,
+      ),
+  ])
+  os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'cpp'
 
   # Keep this list of dependencies in sync with tox.ini.
   install_requires = []
