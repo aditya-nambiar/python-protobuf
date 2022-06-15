@@ -29,10 +29,10 @@ from distutils.spawn import find_executable
 # Find the Protocol Compiler.
 if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
   protoc = os.environ['PROTOC']
-elif os.path.exists('../src/protoc'):
-  protoc = '../src/protoc'
-elif os.path.exists('../src/protoc.exe'):
-  protoc = '../src/protoc.exe'
+elif os.path.exists('src/protoc'):
+  protoc = 'src/protoc'
+elif os.path.exists('src/protoc.exe'):
+  protoc = 'src/protoc.exe'
 elif os.path.exists('../vsprojects/Debug/protoc.exe'):
   protoc = '../vsprojects/Debug/protoc.exe'
 elif os.path.exists('../vsprojects/Release/protoc.exe'):
@@ -69,7 +69,7 @@ def GenProto(source, require=True):
   if not require and not os.path.exists(source):
     return
 
-  output = source.replace('.proto', '_pb2.py').replace('../src/', '')
+  output = source.replace('.proto', '_pb2.py').replace('src/', '')
 
   if (not os.path.exists(output) or
       (os.path.exists(source) and
@@ -82,33 +82,33 @@ def GenProto(source, require=True):
 
     if protoc is None:
       sys.stderr.write(
-          'protoc is not installed nor found in ../src.  Please compile it '
+          'protoc is not installed nor found in src.  Please compile it '
           'or install the binary package.\n')
       sys.exit(-1)
 
-    protoc_command = [protoc, '-I../src', '-I.', '--python_out=.', source]
+    protoc_command = [protoc, '-Isrc', '-I.', '--python_out=.', source]
     if subprocess.call(protoc_command) != 0:
       sys.exit(-1)
 
 
 def GenerateUnittestProtos():
   """Generates protobuf code for unittests."""
-  GenProto('../src/google/protobuf/any_test.proto', False)
-  GenProto('../src/google/protobuf/map_proto2_unittest.proto', False)
-  GenProto('../src/google/protobuf/map_unittest.proto', False)
-  GenProto('../src/google/protobuf/test_messages_proto3.proto', False)
-  GenProto('../src/google/protobuf/test_messages_proto2.proto', False)
-  GenProto('../src/google/protobuf/unittest_arena.proto', False)
-  GenProto('../src/google/protobuf/unittest.proto', False)
-  GenProto('../src/google/protobuf/unittest_custom_options.proto', False)
-  GenProto('../src/google/protobuf/unittest_import.proto', False)
-  GenProto('../src/google/protobuf/unittest_import_public.proto', False)
-  GenProto('../src/google/protobuf/unittest_mset.proto', False)
-  GenProto('../src/google/protobuf/unittest_mset_wire_format.proto', False)
-  GenProto('../src/google/protobuf/unittest_no_generic_services.proto', False)
-  GenProto('../src/google/protobuf/unittest_proto3_arena.proto', False)
-  GenProto('../src/google/protobuf/util/json_format.proto', False)
-  GenProto('../src/google/protobuf/util/json_format_proto3.proto', False)
+  GenProto('src/google/protobuf/any_test.proto', False)
+  GenProto('src/google/protobuf/map_proto2_unittest.proto', False)
+  GenProto('src/google/protobuf/map_unittest.proto', False)
+  GenProto('src/google/protobuf/test_messages_proto3.proto', False)
+  GenProto('src/google/protobuf/test_messages_proto2.proto', False)
+  GenProto('src/google/protobuf/unittest_arena.proto', False)
+  GenProto('src/google/protobuf/unittest.proto', False)
+  GenProto('src/google/protobuf/unittest_custom_options.proto', False)
+  GenProto('src/google/protobuf/unittest_import.proto', False)
+  GenProto('src/google/protobuf/unittest_import_public.proto', False)
+  GenProto('src/google/protobuf/unittest_mset.proto', False)
+  GenProto('src/google/protobuf/unittest_mset_wire_format.proto', False)
+  GenProto('src/google/protobuf/unittest_no_generic_services.proto', False)
+  GenProto('src/google/protobuf/unittest_proto3_arena.proto', False)
+  GenProto('src/google/protobuf/util/json_format.proto', False)
+  GenProto('src/google/protobuf/util/json_format_proto3.proto', False)
   GenProto('google/protobuf/internal/any_test.proto', False)
   GenProto('google/protobuf/internal/descriptor_pool_test1.proto', False)
   GenProto('google/protobuf/internal/descriptor_pool_test2.proto', False)
@@ -154,18 +154,18 @@ class BuildPyCmd(_build_py):
 
   def run(self):
     # Generate necessary .proto file if it doesn't exist.
-    GenProto('../src/google/protobuf/descriptor.proto')
-    GenProto('../src/google/protobuf/compiler/plugin.proto')
-    GenProto('../src/google/protobuf/any.proto')
-    GenProto('../src/google/protobuf/api.proto')
-    GenProto('../src/google/protobuf/duration.proto')
-    GenProto('../src/google/protobuf/empty.proto')
-    GenProto('../src/google/protobuf/field_mask.proto')
-    GenProto('../src/google/protobuf/source_context.proto')
-    GenProto('../src/google/protobuf/struct.proto')
-    GenProto('../src/google/protobuf/timestamp.proto')
-    GenProto('../src/google/protobuf/type.proto')
-    GenProto('../src/google/protobuf/wrappers.proto')
+    GenProto('src/google/protobuf/descriptor.proto')
+    GenProto('src/google/protobuf/compiler/plugin.proto')
+    GenProto('src/google/protobuf/any.proto')
+    GenProto('src/google/protobuf/api.proto')
+    GenProto('src/google/protobuf/duration.proto')
+    GenProto('src/google/protobuf/empty.proto')
+    GenProto('src/google/protobuf/field_mask.proto')
+    GenProto('src/google/protobuf/source_context.proto')
+    GenProto('src/google/protobuf/struct.proto')
+    GenProto('src/google/protobuf/timestamp.proto')
+    GenProto('src/google/protobuf/type.proto')
+    GenProto('src/google/protobuf/wrappers.proto')
     GenerateUnittestProtos()
 
     # _build_py is an old-style class, so super() doesn't work.
@@ -231,8 +231,8 @@ if __name__ == '__main__':
   extra_objects = None
   if compile_static_ext:
     libraries = None
-    extra_objects = ['../src/.libs/libprotobuf.a',
-                     '../src/.libs/libprotobuf-lite.a']
+    extra_objects = ['src/.libs/libprotobuf.a',
+                     'src/.libs/libprotobuf-lite.a']
   TestConformanceCmd.target = 'test_python_cpp'
 
   extra_compile_args = []
@@ -300,11 +300,11 @@ if __name__ == '__main__':
       Extension(
           'google.protobuf.pyext._message',
           glob.glob('google/protobuf/pyext/*.cc'),
-          include_dirs=['.', '../src'],
+          include_dirs=['.', 'src'],
           libraries=libraries,
           extra_objects=extra_objects,
           extra_link_args=message_extra_link_args,
-          library_dirs=['../src/.libs'],
+          library_dirs=['src/.libs'],
           extra_compile_args=extra_compile_args,
       ),
       Extension(
